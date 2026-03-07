@@ -4,7 +4,7 @@ bare bones internal for cs2
 - interface system
 - schema system
 - convar system
-- hooking system
+- full hooking system using minhook
 - pre made dx11 hook with gui
 - pre made OnAddEntity and OnRemoveEntity hooks
 
