@@ -1,35 +1,25 @@
 #include "pch.h"
-// used: [crt] time_t, time, localtime_s
 #include <ctime>
 
 #include "log.h"
-// using: mem_stackalloc, mem_stackfree
 #include "core/mem/memory.h"
-// used: IsPowerOfTwo
 #include "core/math/math.h"
-// used: GetWorkingPath
 
-// console write stream
 static HANDLE hConsoleStream = INVALID_HANDLE_VALUE;
-// file write stream
 static HANDLE hFileStream = INVALID_HANDLE_VALUE;
 
 #pragma region log_main
 bool L::AttachConsole(const wchar_t* wszWindowTitle)
 {
-	// allocate memory for console
 	if (::AllocConsole() != TRUE)
 		return false;
 
-	// open console output stream
 	if (hConsoleStream = ::CreateFileW(L"CONOUT$", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr); hConsoleStream == INVALID_HANDLE_VALUE)
 		return false;
 
-	// @test: unnecessary as fas as we don't use std::cout etc
 	if (::SetStdHandle(STD_OUTPUT_HANDLE, hConsoleStream) != TRUE)
 		return false;
 
-	// set console window title
 	if (::SetConsoleTitleW(wszWindowTitle) != TRUE)
 		return false;
 
@@ -40,11 +30,9 @@ void L::DetachConsole()
 {
 	::CloseHandle(hConsoleStream);
 
-	// free allocated memory for console
 	if (::FreeConsole() != TRUE)
 		return;
 
-	// close console window
 	if (const HWND hConsoleWindow = ::GetConsoleWindow(); hConsoleWindow != nullptr)
 		::PostMessageW(hConsoleWindow, WM_CLOSE, 0U, 0L);
 }
@@ -58,11 +46,9 @@ bool L::OpenFile(const wchar_t* wszFileName)
 	CRT::StringCat(wszFilePath, wszFileName);
 
 	// @todo: append time/date to filename and always keep up to 3 files, otherwise delete with lowest date
-	// open file output stream
 	if (hFileStream = ::CreateFileW(wszFilePath, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr); hFileStream == INVALID_HANDLE_VALUE)
 		return false;
 
-	// insert UTF-8 BOM
 	::WriteFile(hFileStream, "\xEF\xBB\xBF", 3UL, nullptr, nullptr);
 
 	return true;
@@ -137,7 +123,6 @@ L::Stream_t& L::Stream_t::operator()(const ELogLevel nLevel, const char* szFileB
 	std::tm timePoint;
 	localtime_s(&timePoint, &time);
 
-	// @todo: no new line at first use / ghetto af but cheap enough but still ghetto uhhh
 	char szTimeBuffer[32];
 	const std::size_t nTimeSize = CRT::TimeToString(szTimeBuffer, sizeof(szTimeBuffer), "\n[%d-%m-%Y %T] ", &timePoint) - bFirstPrint;
 
@@ -220,21 +205,7 @@ L::Stream_t& L::Stream_t::operator<<(const char* szMessage)
 L::Stream_t& L::Stream_t::operator<<(const wchar_t* wszMessage)
 {
 #if defined(CS_LOG_CONSOLE) || defined(CS_LOG_FILE)
-	/*
-	 * to keep stream orientation always same, convert message to UTF-8
-	 *
-	 * regarding to C++ standard:
-	 * [C++11: 27.4.1/3]:
-	 *    mixing operations on corresponding wide- and narrow-character streams follows the same semantics as mixing such operations on 'FILE's, as specified in amendation [1] of the ISO C standard
-	 *
-	 * [1]:
-	 *    the definition of a stream was changed to include the concept of an orientation for both text and binary streams.
-	 *    after a stream is associated with a file, but before any operations are performed on the stream, the stream is without orientation.
-	 *    if a wide-character input or output function is applied to a stream without orientation, the stream becomes wide-oriented.
-	 *    likewise, if a byte input or output operation is applied to a stream with orientation, the stream becomes byte-oriented.
-	 *    thereafter, only the 'fwide()' or 'freopen()' functions can alter the orientation of a stream.
-	 *    byte input/output functions shall not be applied to a wide-oriented stream and wide-character input/output functions shall not be applied to a byte-oriented stream.
-	 */
+
 	const std::size_t nMessageLength = CRT::StringLengthMultiByte(wszMessage);
 	char* szMessage = static_cast<char*>(MEM_STACKALLOC(nMessageLength + 1U));
 	CRT::StringUnicodeToMultiByte(szMessage, nMessageLength + 1U, wszMessage);
