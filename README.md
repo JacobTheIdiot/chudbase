@@ -1,6 +1,6 @@
 bare bones internal for cs2
 
-features:
+# features
 - interface system
 - schema system
 - convar system
@@ -8,4 +8,8 @@ features:
 - pre made dx11 hook with gui
 - pre made OnAddEntity and OnRemoveEntity hooks
 
-credits: asphyxia for some parts of the base (I credited what I took from them)
+# how to use
+open the project in visual studio and build, inject with your favorite manual map injector.
+
+# credits
+asphyxia for some parts of the base (I credited what I took from them)
