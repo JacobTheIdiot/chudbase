@@ -7,15 +7,12 @@
 
 #include "pch.h"
 
-// using: stringcopy, stringcat, timetostring
 #include "crt.h"
 
-// used: sdk datatypes
 #include "cs2/datatypes/color.h"
 #include "cs2/datatypes/vector.h"
 #include "cs2/datatypes/qangle.h"
 
-// @todo: poorly designed in case we don't need logging at all, xor continues wasteful compilation without any references | add smth like dummystream_t and unreference macro params?
 
 #pragma region log_definitions
 #ifdef _DEBUG
@@ -152,23 +149,16 @@ namespace L
 		}
 	}
 
-	/* @section: main */
-	// attach console to current window with write permission and given title
+
 	bool AttachConsole(const wchar_t* wszWindowTitle);
-	// close write streams and detach console from current window
 	void DetachConsole();
-	// open logging output file
 	bool OpenFile(const wchar_t* wszFileName);
-	// close logging output file
 	void CloseFile();
-	// write message to the file or/and console
 	void WriteMessage(const char* szMessage, const std::size_t nMessageLength);
 
 	// alternative of C++ 'std::cout' and other STL-like streams logging scheme
-	// @todo: is it faster to constantly call 'WriteMessage' instead of concatenating all of the output and print once? i dont think so, due to additional allocations, thread-safe requirements, conditions when we still should call print due to color/etc changes | but generally this should lead to better inlining and less complicated compiled code
 	struct Stream_t
 	{
-		// special unique return type markers to determine and handle change of those flags, just a snap for compile-time, inlined as underlying types at run-time
 		struct ColorMarker_t
 		{
 			LogColorFlags_t nColorFlags;
