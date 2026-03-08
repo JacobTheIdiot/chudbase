@@ -9,6 +9,7 @@ bare bones internal for cs2
 - pre made OnAddEntity and OnRemoveEntity hooks
 - pre made OverrideView hook (with CViewSetup)
 - pre made OnRenderStart hook
+- xrefs for every hook
 
 # how to use
 open the project in visual studio and build, inject with your favorite manual map injector.
