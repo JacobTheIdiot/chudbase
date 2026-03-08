@@ -63,7 +63,11 @@ public:
 
 	[[nodiscard]] const char* GetProductVersionString()
 	{
-		return memory::CallVFunc<const char*, 84U>(this);
+		return memory::CallVFunc<const char*, 90>(this);
+	}
+	[[nodiscard]] const char* GetProductDateString()
+	{
+		return memory::CallVFunc<const char*, 89>(this);
 	}
 
 	void ExecuteClientCmdUnrestricted(const char* szCommand)

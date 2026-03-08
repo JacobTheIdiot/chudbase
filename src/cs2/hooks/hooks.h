@@ -7,9 +7,11 @@
 #include "cs2/datatypes/matrix.h"
 #include "cs2/interface/Interfaces.h"
 #include "cs2/interface/interfaces/iswapchaindx11.h"
+#include "cs2/interface/interfaces/iclientmodeshared.h"
+#include "cs2/interface/interfaces/ccsgoinput.h"
 #include "cs2/inputsystem.h"
 #include "cs2/entity/entity.h"
-//credit: asphyxia
+//credit: asphyxia (for the vtable namespace)
 namespace VTABLE
 {
 	namespace D3D
@@ -61,13 +63,19 @@ namespace Globals
 {
 
 }
-
+//client.dll
 //xref: str: "CCSGOINPUT"
-#define CREATEMOVE_PATTERN "48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 8B F9 E8 ? ? ? ? 48 8B 0D"
+#define CREATEMOVE_PATTERN XOR("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 48 8B F9 E8 ? ? ? ? 48 8B 0D")
 
 //xref: class: CGameEntitySystem->index 15 and 16
-#define ON_ADD_ENTITY_PATTERN "48 89 74 24 ? 57 48 83 EC ? 41 B9 ? ? ? ? 41 8B C0 41 23 C1 48 8B F2 41 83 F8 ? 48 8B F9 44 0F 45 C8 41 81 F9 ? ? ? ? 73 ? FF 81"
-#define ON_REMOVE_ENTITY_PATTERN "48 89 74 24 ? 57 48 83 EC ? 41 B9 ? ? ? ? 41 8B C0 41 23 C1 48 8B F2 41 83 F8 ? 48 8B F9 44 0F 45 C8 41 81 F9 ? ? ? ? 73 ? FF 89"
+#define ON_ADD_ENTITY_PATTERN XOR("48 89 74 24 ? 57 48 83 EC ? 41 B9 ? ? ? ? 41 8B C0 41 23 C1 48 8B F2 41 83 F8 ? 48 8B F9 44 0F 45 C8 41 81 F9 ? ? ? ? 73 ? FF 81")
+#define ON_REMOVE_ENTITY_PATTERN XOR("48 89 74 24 ? 57 48 83 EC ? 41 B9 ? ? ? ? 41 8B C0 41 23 C1 48 8B F2 41 83 F8 ? 48 8B F9 44 0F 45 C8 41 81 F9 ? ? ? ? 73 ? FF 89")
+
+//xref: class: ClientModeCSNormal->index 15
+#define OVERRIDE_VIEW_PATTERN XOR("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC ? 48 8B FA E8")
+
+//scenesystem.dll:
+//placeholder for now
 
 namespace detours
 {
@@ -80,6 +88,9 @@ namespace detours
 
 	inline CDetourHook OnAddEntity = CDetourHook(XOR("OnAddEntity"));
 	inline CDetourHook OnRemoveEntity = CDetourHook(XOR("OnRemoveEntity"));
+
+	inline CDetourHook OverrideView = CDetourHook(XOR("OverrideView"));
+	inline CDetourHook OnRenderStart = CDetourHook(XOR("OnRenderStart"));
 
 
 	//scenesystem.dll:
@@ -148,4 +159,7 @@ namespace hooks
 
 	void* __fastcall hkOnAddEntity(void* pThis, CEntityInstance* pInstance, CBaseHandle uHandle);
 	void* __fastcall hkOnRemoveEntity(void* pThis, CEntityInstance* pInstance, CBaseHandle uHandle);
+
+	void __fastcall hkOverrideView(void* a1, CViewSetup* pSetup);
+	void __fastcall hkOnRenderStart(CViewRender* pViewRender);
 }

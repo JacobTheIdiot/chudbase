@@ -8,6 +8,11 @@
 #include "cs2/interface/Interfaces.h"
 #include "cs2/interface/interfaces/imemalloc.h"
 
+#include <iostream>
+#include <Windows.h>
+#undef max
+#undef min
+
 // @source: server.dll
 enum ECommandButtons : std::uint64_t
 {

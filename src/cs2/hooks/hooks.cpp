@@ -21,6 +21,10 @@ bool hooks::setup()
 	SubscribeHook(detours::RelativeMouseMode.Init(&hkRelativeMouseMode, Interface::InputSystem, 76));
 	SubscribeHook(detours::OnAddEntity.Init(&hkOnAddEntity, memory::FindPattern(CLIENT_DLL, ON_ADD_ENTITY_PATTERN)));
 	SubscribeHook(detours::OnRemoveEntity.Init(&hkOnRemoveEntity, memory::FindPattern(CLIENT_DLL, ON_REMOVE_ENTITY_PATTERN)));
+	SubscribeHook(detours::OnRenderStart.Init(&hkOnRenderStart, Interface::m_pViewRender, 4));
+	SubscribeHook(detours::OverrideView.Init(&hkOverrideView, memory::FindPattern(CLIENT_DLL, OVERRIDE_VIEW_PATTERN)));
+
+
 
 	//  swapchain hook
 	IDXGIDevice* pDXGIDevice = NULL;
@@ -153,4 +157,25 @@ void* __fastcall hooks::hkOnRemoveEntity(void* pThis, CEntityInstance* pInstance
 	const auto oOnRemoveEntity = detours::OnRemoveEntity.GetOriginal< decltype(&hkOnRemoveEntity) >();
 	//g_Entities->OnRemoveEntity(pInstance, uHandle);
 	return oOnRemoveEntity(pThis, pInstance, uHandle);
+}
+void __fastcall hooks::hkOverrideView(void* a1, CViewSetup* pSetup)
+{
+	const auto oOverrideView = detours::OverrideView.GetOriginal< decltype(&hkOverrideView) >();
+
+	return oOverrideView(a1, pSetup);
+}
+
+void __fastcall hooks::hkOnRenderStart(CViewRender* pViewRender)
+{
+	const auto oOnRenderStart = detours::OnRenderStart.GetOriginal<decltype(&hkOnRenderStart)>();
+
+	oOnRenderStart(pViewRender);
+	
+	/*
+	* you're gonna wanna do smth like this:
+	* return features::onRenderStart(pViewRender); 
+	* but since i haven't made that in this base we'll just return the og
+	*/
+	return oOnRenderStart(pViewRender);
+
 }
