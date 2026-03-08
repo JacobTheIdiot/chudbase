@@ -24,8 +24,6 @@ bool hooks::setup()
 	SubscribeHook(detours::OnRenderStart.Init(&hkOnRenderStart, Interface::m_pViewRender, 4));
 	SubscribeHook(detours::OverrideView.Init(&hkOverrideView, memory::FindPattern(CLIENT_DLL, OVERRIDE_VIEW_PATTERN)));
 
-
-
 	//  swapchain hook
 	IDXGIDevice* pDXGIDevice = NULL;
 	Interface::Device->QueryInterface(IID_PPV_ARGS(&pDXGIDevice));

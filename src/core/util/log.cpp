@@ -61,7 +61,7 @@ void L::CloseFile()
 
 void L::WriteMessage(const char* szMessage, const std::size_t nMessageLength)
 {
-#ifdef CS_LOG_CONSOLE
+#ifdef _DEBUG
 	::WriteConsoleA(hConsoleStream, szMessage, nMessageLength, nullptr, nullptr);
 #endif
 #ifdef CS_LOG_FILE
@@ -94,7 +94,7 @@ L::Stream_t::ModeMarker_t L::RemoveFlags(const LogModeFlags_t nModeFlags)
 
 L::Stream_t& L::Stream_t::operator()(const ELogLevel nLevel, const char* szFileBlock)
 {
-#if defined(CS_LOG_CONSOLE) || defined(CS_LOG_FILE)
+#if defined(_DEBUG) || defined(CS_LOG_FILE)
 	// reset previous flags
 	nModeFlags = LOG_MODE_NONE;
 
@@ -126,7 +126,7 @@ L::Stream_t& L::Stream_t::operator()(const ELogLevel nLevel, const char* szFileB
 	char szTimeBuffer[32];
 	const std::size_t nTimeSize = CRT::TimeToString(szTimeBuffer, sizeof(szTimeBuffer), "\n[%d-%m-%Y %T] ", &timePoint) - bFirstPrint;
 
-#ifdef CS_LOG_CONSOLE
+#ifdef _DEBUG
 	::SetConsoleTextAttribute(hConsoleStream, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	::WriteConsoleA(hConsoleStream, szTimeBuffer + bFirstPrint, nTimeSize, nullptr, nullptr);
 
@@ -167,7 +167,7 @@ L::Stream_t& L::Stream_t::operator()(const ELogLevel nLevel, const char* szFileB
 
 L::Stream_t& L::Stream_t::operator<<(const ColorMarker_t colorMarker)
 {
-#ifdef CS_LOG_CONSOLE
+#ifdef _DEBUG
 	::SetConsoleTextAttribute(hConsoleStream, static_cast<WORD>(colorMarker.nColorFlags));
 #endif
 	return *this;
@@ -175,7 +175,7 @@ L::Stream_t& L::Stream_t::operator<<(const ColorMarker_t colorMarker)
 
 L::Stream_t& L::Stream_t::operator<<(const PrecisionMarker_t precisionMarker)
 {
-#if defined(CS_LOG_CONSOLE) || defined(CS_LOG_FILE)
+#if defined(_DEBUG) || defined(CS_LOG_FILE)
 	this->iPrecision = precisionMarker.iPrecision;
 #endif
 	return *this;
@@ -183,7 +183,7 @@ L::Stream_t& L::Stream_t::operator<<(const PrecisionMarker_t precisionMarker)
 
 L::Stream_t& L::Stream_t::operator<<(const ModeMarker_t modeMarker)
 {
-#if defined(CS_LOG_CONSOLE) || defined(CS_LOG_FILE)
+#if defined(_DEBUG) || defined(CS_LOG_FILE)
 	CS_ASSERT(nModeFlags == 0U || MATH::IsPowerOfTwo(nModeFlags & LOG_MODE_INT_FORMAT_MASK)); // used conflicting format flags
 
 	if (modeMarker.nModeFlags & LOG_MODE_REMOVE)
@@ -196,7 +196,7 @@ L::Stream_t& L::Stream_t::operator<<(const ModeMarker_t modeMarker)
 
 L::Stream_t& L::Stream_t::operator<<(const char* szMessage)
 {
-#if defined(CS_LOG_CONSOLE) || defined(CS_LOG_FILE)
+#if defined(_DEBUG) || defined(CS_LOG_FILE)
 	WriteMessage(szMessage, CRT::StringLength(szMessage));
 #endif
 	return *this;
@@ -204,7 +204,7 @@ L::Stream_t& L::Stream_t::operator<<(const char* szMessage)
 
 L::Stream_t& L::Stream_t::operator<<(const wchar_t* wszMessage)
 {
-#if defined(CS_LOG_CONSOLE) || defined(CS_LOG_FILE)
+#if defined(_DEBUG) || defined(CS_LOG_FILE)
 
 	const std::size_t nMessageLength = CRT::StringLengthMultiByte(wszMessage);
 	char* szMessage = static_cast<char*>(MEM_STACKALLOC(nMessageLength + 1U));
