@@ -18,6 +18,7 @@ open the project in visual studio and build, inject with your favorite manual ma
 ## coming soon
 - entity list (using OnAddEntity and OnRemoveEntity)
 - more utils
+- full config system
 
 ## credits
 asphyxia for some of the interfaces and some other random parts of the base (I credited what I took from them)
