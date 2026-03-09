@@ -69,7 +69,7 @@ std::uint32_t schema::GetOffset(const FNV1A_t uHashedFieldName)
 		it != vecSchemaData.end())
 		return it->uOffset;
 
-	L_PRINT(LOG_ERROR) << XOR("failed to find offset for field with hash: ") << L::AddFlags(LOG_MODE_INT_FORMAT_HEX | LOG_MODE_INT_SHOWBASE) << uHashedFieldName;
+	L_PRINT(LOG_ERROR) << XOR("failed to find offset for field with hash: ") << console::AddFlags(LOG_MODE_INT_FORMAT_HEX | LOG_MODE_INT_SHOWBASE) << uHashedFieldName;
 	CS_ASSERT(false); // schema field not found
 	return 0U;
 }
@@ -121,7 +121,7 @@ std::uint32_t schema::GetForeignOffset(const char* szModulenName, const FNV1A_t 
 
 found:
 	if (uOffset == 0x0)
-		L_PRINT(LOG_WARNING) << XOR("failed to find offset for field with hash: ") << L::AddFlags(LOG_MODE_INT_FORMAT_HEX | LOG_MODE_INT_SHOWBASE) << uHashedFieldName;
+		L_PRINT(LOG_WARNING) << XOR("failed to find offset for field with hash: ") << console::AddFlags(LOG_MODE_INT_FORMAT_HEX | LOG_MODE_INT_SHOWBASE) << uHashedFieldName;
 
 	return uOffset;
 }

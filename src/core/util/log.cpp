@@ -1,6 +1,8 @@
 #include "pch.h"
 #include <ctime>
-
+#include <Windows.h>
+#include <iostream>
+#include <shlobj.h>
 #include "log.h"
 #include "core/mem/memory.h"
 #include "core/math/math.h"
@@ -9,7 +11,7 @@ static HANDLE hConsoleStream = INVALID_HANDLE_VALUE;
 static HANDLE hFileStream = INVALID_HANDLE_VALUE;
 
 #pragma region log_main
-bool L::AttachConsole(const wchar_t* wszWindowTitle)
+bool console::AttachConsole(const wchar_t* wszWindowTitle)
 {
 	if (::AllocConsole() != TRUE)
 		return false;
@@ -26,7 +28,7 @@ bool L::AttachConsole(const wchar_t* wszWindowTitle)
 	return true;
 }
 
-void L::DetachConsole()
+void console::DetachConsole()
 {
 	::CloseHandle(hConsoleStream);
 
@@ -37,11 +39,20 @@ void L::DetachConsole()
 		::PostMessageW(hConsoleWindow, WM_CLOSE, 0U, 0L);
 }
 
-bool L::OpenFile(const wchar_t* wszFileName)
+bool console::OpenFile(const wchar_t* wszFileName)
 {
 	wchar_t wszFilePath[MAX_PATH];
-	//if (!FileUtils::GetWorkingPath(wszFilePath))
-		//return false;
+	wchar_t wszDocumentsPath[MAX_PATH];
+
+	HRESULT result = ::SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, wszDocumentsPath);
+
+	if (!SUCCEEDED(result))
+		return false;
+
+	wcscpy_s(wszFilePath, wszDocumentsPath);
+	wcscat_s(wszFilePath, L"\\.chudbase\\");
+	//when i recode this whole thing i'll make a fileutil for this instead of doing it in here
+	::CreateDirectoryW(wszFilePath, nullptr);
 
 	CRT::StringCat(wszFilePath, wszFileName);
 
@@ -54,66 +65,65 @@ bool L::OpenFile(const wchar_t* wszFileName)
 	return true;
 }
 
-void L::CloseFile()
+void console::CloseFile()
 {
 	::CloseHandle(hFileStream);
 }
 
-void L::WriteMessage(const char* szMessage, const std::size_t nMessageLength)
+void console::WriteMessage(const char* szMessage, const std::size_t nMessageLength)
 {
 #ifdef _DEBUG
 	::WriteConsoleA(hConsoleStream, szMessage, nMessageLength, nullptr, nullptr);
 #endif
-#ifdef CS_LOG_FILE
-	::WriteFile(hFileStream, szMessage, nMessageLength, nullptr, nullptr);
-#endif
+
+::WriteFile(hFileStream, szMessage, nMessageLength, nullptr, nullptr);
+
 }
 #pragma endregion
 
 #pragma region log_stream_control
-L::Stream_t::ColorMarker_t L::SetColor(const LogColorFlags_t nColorFlags)
+console::Stream_t::ColorMarker_t console::SetColor(const LogColorFlags_t nColorFlags)
 {
 	return { nColorFlags };
 }
 
-L::Stream_t::PrecisionMarker_t L::SetPrecision(const int iPrecision)
+console::Stream_t::PrecisionMarker_t console::SetPrecision(const int iPrecision)
 {
 	return { iPrecision };
 }
 
-L::Stream_t::ModeMarker_t L::AddFlags(const LogModeFlags_t nModeFlags)
+console::Stream_t::ModeMarker_t console::AddFlags(const LogModeFlags_t nModeFlags)
 {
 	return { nModeFlags };
 }
 
-L::Stream_t::ModeMarker_t L::RemoveFlags(const LogModeFlags_t nModeFlags)
+console::Stream_t::ModeMarker_t console::RemoveFlags(const LogModeFlags_t nModeFlags)
 {
 	return { static_cast<LogModeFlags_t>(nModeFlags | LOG_MODE_REMOVE) };
 }
 #pragma endregion
 
-L::Stream_t& L::Stream_t::operator()(const ELogLevel nLevel, const char* szFileBlock)
+console::Stream_t& console::Stream_t::operator()(const ELogLevel nLevel, const char* szFileBlock)
 {
-#if defined(_DEBUG) || defined(CS_LOG_FILE)
 	// reset previous flags
 	nModeFlags = LOG_MODE_NONE;
 
 	const char* szTypeBlock = nullptr;
-	[[maybe_unused]] LogColorFlags_t nTypeColorFlags = LOG_COLOR_DEFAULT;
+	[[maybe_unused]] LogColorFlags_t nTypeColorFlags = CONSOLE_DEFAULT;
 
 	switch (nLevel)
 	{
 	case LOG_INFO:
 		szTypeBlock = "[info] ";
-		nTypeColorFlags = LOG_COLOR_FORE_CYAN;
+		nTypeColorFlags = CONSOLE_FORE_CYAN;
 		break;
 	case LOG_WARNING:
 		szTypeBlock = "[warning] ";
-		nTypeColorFlags = LOG_COLOR_FORE_YELLOW;
+		nTypeColorFlags = CONSOLE_FORE_YELLOW;
 		break;
 	case LOG_ERROR:
 		szTypeBlock = "[error] ";
-		nTypeColorFlags = LOG_COLOR_FORE_RED;
+		nTypeColorFlags = CONSOLE_FORE_RED;
 		break;
 	default:
 		break;
@@ -144,7 +154,6 @@ L::Stream_t& L::Stream_t::operator()(const ELogLevel nLevel, const char* szFileB
 
 	::SetConsoleTextAttribute(hConsoleStream, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 #endif
-#ifdef CS_LOG_FILE
 	::WriteFile(hFileStream, szTimeBuffer + bFirstPrint, nTimeSize, nullptr, nullptr);
 
 	char szBlockBuffer[MAX_PATH] = { '\0' };
@@ -158,14 +167,13 @@ L::Stream_t& L::Stream_t::operator()(const ELogLevel nLevel, const char* szFileB
 
 	if (szBlockBuffer[0] != '\0')
 		::WriteFile(hFileStream, szBlockBuffer, static_cast<DWORD>(szCurrentBlock - szBlockBuffer), nullptr, nullptr);
-#endif
+
 
 	bFirstPrint = false;
-#endif
 	return *this;
 }
 
-L::Stream_t& L::Stream_t::operator<<(const ColorMarker_t colorMarker)
+console::Stream_t& console::Stream_t::operator<<(const ColorMarker_t colorMarker)
 {
 #ifdef _DEBUG
 	::SetConsoleTextAttribute(hConsoleStream, static_cast<WORD>(colorMarker.nColorFlags));
@@ -173,15 +181,14 @@ L::Stream_t& L::Stream_t::operator<<(const ColorMarker_t colorMarker)
 	return *this;
 }
 
-L::Stream_t& L::Stream_t::operator<<(const PrecisionMarker_t precisionMarker)
+console::Stream_t& console::Stream_t::operator<<(const PrecisionMarker_t precisionMarker)
 {
-#if defined(_DEBUG) || defined(CS_LOG_FILE)
 	this->iPrecision = precisionMarker.iPrecision;
-#endif
+
 	return *this;
 }
 
-L::Stream_t& L::Stream_t::operator<<(const ModeMarker_t modeMarker)
+console::Stream_t& console::Stream_t::operator<<(const ModeMarker_t modeMarker)
 {
 #if defined(_DEBUG) || defined(CS_LOG_FILE)
 	CS_ASSERT(nModeFlags == 0U || MATH::IsPowerOfTwo(nModeFlags & LOG_MODE_INT_FORMAT_MASK)); // used conflicting format flags
@@ -194,17 +201,15 @@ L::Stream_t& L::Stream_t::operator<<(const ModeMarker_t modeMarker)
 	return *this;
 }
 
-L::Stream_t& L::Stream_t::operator<<(const char* szMessage)
+console::Stream_t& console::Stream_t::operator<<(const char* szMessage)
 {
-#if defined(_DEBUG) || defined(CS_LOG_FILE)
 	WriteMessage(szMessage, CRT::StringLength(szMessage));
-#endif
+
 	return *this;
 }
 
-L::Stream_t& L::Stream_t::operator<<(const wchar_t* wszMessage)
+console::Stream_t& console::Stream_t::operator<<(const wchar_t* wszMessage)
 {
-#if defined(_DEBUG) || defined(CS_LOG_FILE)
 
 	const std::size_t nMessageLength = CRT::StringLengthMultiByte(wszMessage);
 	char* szMessage = static_cast<char*>(MEM_STACKALLOC(nMessageLength + 1U));
@@ -213,17 +218,15 @@ L::Stream_t& L::Stream_t::operator<<(const wchar_t* wszMessage)
 	WriteMessage(szMessage, nMessageLength);
 
 	MEM_STACKFREE(szMessage);
-#endif
 	return *this;
 }
 
-L::Stream_t& L::Stream_t::operator<<(const bool bValue)
+console::Stream_t& console::Stream_t::operator<<(const bool bValue)
 {
-#if defined(CS_LOG_CONSOLE) || defined(CS_LOG_FILE)
 	const char* szBoolean = ((nModeFlags & LOG_MODE_BOOL_ALPHA) ? (bValue ? "true" : "false") : (bValue ? "1" : "0"));
 	const std::size_t nBooleanLength = CRT::StringLength(szBoolean);
 
 	WriteMessage(szBoolean, nBooleanLength);
-#endif
+
 	return *this;
 }

@@ -195,7 +195,7 @@ void* memory::GetExportAddress(const void* hModuleBase, const char* szProcedureN
 			const std::uint32_t uFunctionRVA = pFunctionsRVA[pNameOrdinalsRVA[uMiddle]];
 
 #ifdef _DEBUG
-			L_PRINT(LOG_INFO) << XOR("export found: \"") << reinterpret_cast<const char*>(pBaseAddress + pNamesRVA[uMiddle]) << XOR("\" in \"") << GetModuleBaseFileName(hModuleBase) << XOR("\" at: ") << L::AddFlags(LOG_MODE_INT_SHOWBASE | LOG_MODE_INT_FORMAT_HEX) << uFunctionRVA;
+			L_PRINT(LOG_INFO) << XOR("export found: \"") << reinterpret_cast<const char*>(pBaseAddress + pNamesRVA[uMiddle]) << XOR("\" in \"") << GetModuleBaseFileName(hModuleBase) << XOR("\" at: ") << console::AddFlags(LOG_MODE_INT_SHOWBASE | LOG_MODE_INT_FORMAT_HEX) << uFunctionRVA;
 #else
 			L_PRINT(LOG_INFO) << XOR("export found: ") << szProcedureName;
 #endif // _DEBUG

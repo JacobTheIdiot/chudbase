@@ -13,13 +13,15 @@
 #include "cs2/datatypes/vector.h"
 #include "cs2/datatypes/qangle.h"
 
+//@credit: asphyxia (although i changed a lot, i'm gonna rewrite it though because their code sucks and i hate it) 
+
 
 #pragma region log_definitions
 #ifdef _DEBUG
 #if defined(CS_COMPILER_CLANG)
 #define L_PRINT(LEVEL) L::stream(LEVEL, "[" __FILE_NAME__ ":" CS_STRINGIFY(__LINE__) "] ")
 #else
-#define L_PRINT(LEVEL) L::stream(LEVEL, L::DETAIL::MakeFileBlock<CRT::StringLength(L::DETAIL::GetFileName(__FILE__)), CRT::StringLength(CS_STRINGIFY(__LINE__))>(L::DETAIL::GetFileName(__FILE__), CS_STRINGIFY(__LINE__)).Get())
+#define L_PRINT(LEVEL) console::stream(LEVEL, console::detail::MakeFileBlock<CRT::StringLength(console::detail::GetFileName(__FILE__)), CRT::StringLength(CS_STRINGIFY(__LINE__))>(console::detail::GetFileName(__FILE__), CS_STRINGIFY(__LINE__)).Get())
 #endif
 #else
 #define L_PRINT(LEVEL) L::stream(LEVEL)
@@ -72,43 +74,37 @@ using LogColorFlags_t = std::uint16_t;
 
 enum ELogColorFlags : LogColorFlags_t
 {
-	LOG_COLOR_FORE_BLUE = FOREGROUND_BLUE,
-	LOG_COLOR_FORE_GREEN = FOREGROUND_GREEN,
-	LOG_COLOR_FORE_RED = FOREGROUND_RED,
-	LOG_COLOR_FORE_INTENSITY = FOREGROUND_INTENSITY,
-	LOG_COLOR_FORE_GRAY = FOREGROUND_INTENSITY,
-	LOG_COLOR_FORE_CYAN = FOREGROUND_BLUE | FOREGROUND_GREEN,
-	LOG_COLOR_FORE_MAGENTA = FOREGROUND_BLUE | FOREGROUND_RED,
-	LOG_COLOR_FORE_YELLOW = FOREGROUND_GREEN | FOREGROUND_RED,
-	LOG_COLOR_FORE_BLACK = 0U,
-	LOG_COLOR_FORE_WHITE = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
+	CONSOLE_FORE_BLUE = FOREGROUND_BLUE,
+	CONSOLE_FORE_GREEN = FOREGROUND_GREEN,
+	CONSOLE_FORE_RED = FOREGROUND_RED,
+	CONSOLE_FORE_INTENSITY = FOREGROUND_INTENSITY,
+	CONSOLE_FORE_GRAY = FOREGROUND_INTENSITY,
+	CONSOLE_FORE_CYAN = FOREGROUND_BLUE | FOREGROUND_GREEN,
+	CONSOLE_FORE_MAGENTA = FOREGROUND_BLUE | FOREGROUND_RED,
+	CONSOLE_FORE_YELLOW = FOREGROUND_GREEN | FOREGROUND_RED,
+	CONSOLE_FORE_BLACK = 0U,
+	CONSOLE_FORE_WHITE = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,
 
-	LOG_COLOR_BACK_BLUE = BACKGROUND_BLUE,
-	LOG_COLOR_BACK_GREEN = BACKGROUND_GREEN,
-	LOG_COLOR_BACK_RED = BACKGROUND_RED,
-	LOG_COLOR_BACK_INTENSITY = BACKGROUND_INTENSITY,
-	LOG_COLOR_BACK_GRAY = BACKGROUND_INTENSITY,
-	LOG_COLOR_BACK_CYAN = BACKGROUND_BLUE | BACKGROUND_GREEN,
-	LOG_COLOR_BACK_MAGENTA = BACKGROUND_BLUE | BACKGROUND_RED,
-	LOG_COLOR_BACK_YELLOW = BACKGROUND_GREEN | BACKGROUND_RED,
-	LOG_COLOR_BACK_BLACK = 0U,
-	LOG_COLOR_BACK_WHITE = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE,
+	CONSOLE_BACK_BLUE = BACKGROUND_BLUE,
+	CONSOLE_BACK_GREEN = BACKGROUND_GREEN,
+	CONSOLE_BACK_RED = BACKGROUND_RED,
+	CONSOLE_BACK_INTENSITY = BACKGROUND_INTENSITY,
+	CONSOLE_BACK_GRAY = BACKGROUND_INTENSITY,
+	CONSOLE_BACK_CYAN = BACKGROUND_BLUE | BACKGROUND_GREEN,
+	CONSOLE_BACK_MAGENTA = BACKGROUND_BLUE | BACKGROUND_RED,
+	CONSOLE_BACK_YELLOW = BACKGROUND_GREEN | BACKGROUND_RED,
+	CONSOLE_BACK_BLACK = 0U,
+	CONSOLE_BACK_WHITE = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE,
 
-	/* [internal] */
-	LOG_COLOR_DEFAULT = LOG_COLOR_FORE_WHITE | LOG_COLOR_BACK_BLACK
+	CONSOLE_DEFAULT = CONSOLE_FORE_WHITE | CONSOLE_BACK_BLACK
 };
 
 #pragma endregion
 
-/*
- * LOGGING
- * - simple logging system with file and console output
- *   used for debugging and fetching values/errors at run-time
- * @todo: currently not thread safe and can mess messages when used from different threads
- */
-namespace L
+//@todo: currently not thread safe and can mess messages when used from different threads
+namespace console
 {
-	namespace DETAIL
+	namespace detail
 	{
 		// @todo: constructs string per-byte in the stack, how do we can optimize this?
 		template <std::size_t N>
@@ -127,7 +123,6 @@ namespace L
 			const char szStorage[N + 5U];
 		};
 
-		// fail-free version of 'StringCharR'
 		consteval const char* GetFileName(const char* szFilePath)
 		{
 			const char* szLastPath = szFilePath;
@@ -190,7 +185,6 @@ namespace L
 		template <typename T> requires std::is_integral_v<T>
 		Stream_t& operator<<(const T value)
 		{
-#if defined(CS_LOG_CONSOLE) || defined(CS_LOG_FILE)
 			int iBase = 10;
 			const char* szPrefix = nullptr;
 
@@ -226,14 +220,12 @@ namespace L
 
 			const std::size_t nIntegerLength = szIntegerBuffer + sizeof(szIntegerBuffer) - szInteger - 1;
 			WriteMessage(szInteger, nIntegerLength);
-#endif
 			return *this;
 		}
 
 		template <typename T> requires std::is_floating_point_v<T>
 		Stream_t& operator<<(const T value)
 		{
-#if defined(CS_LOG_CONSOLE) || defined(CS_LOG_FILE)
 			//static_assert((nModeFlags & (LOG_MODE_FLOAT_FORMAT_FIXED | LOG_MODE_FLOAT_FORMAT_SCIENTIFIC)) && std::is_same_v<T, float>); // expected 'double' or 'long double'
 			int iDesiredPrecision = /*((nModeFlags & (LOG_MODE_FLOAT_FORMAT_FIXED | LOG_MODE_FLOAT_FORMAT_SCIENTIFIC)) ? -1 : (*/ iPrecision > 0 ? iPrecision : FLT_DIG; //));
 
@@ -271,7 +263,6 @@ namespace L
 			const int nFloatLength = CRT::StringPrintN(szFloatBuffer, sizeof(szFloatBuffer), szFormatBuffer, iDesiredPrecision, value);
 
 			WriteMessage(szFloatBuffer, nFloatLength);
-#endif
 			return *this;
 		}
 

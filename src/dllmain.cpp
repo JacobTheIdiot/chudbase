@@ -18,27 +18,34 @@ static bool setup(HMODULE hModule)
     if (bInitialized)
         return true;
 
-#ifdef CS_LOG_CONSOLE
-    if (!L::AttachConsole(CS_XOR(L"Chud Debug Build xp")))
+#ifdef _DEBUG
+    if (!console::AttachConsole(XOR(L"Chud Debug Build xp")))
     {
         CS_ASSERT(false);
         return false;
     }
 #endif
 
+    if (!console::OpenFile(XOR(L"chudbaselog.txt")))
+    {
+        L_PRINT(LOG_ERROR) << XOR("failed setting up the log file");
+        return false;
+    }
+    L_PRINT(LOG_NONE) << console::SetColor(CONSOLE_FORE_GREEN | CONSOLE_FORE_INTENSITY) << XOR("log initialization completed");
+
     if (!memory::Setup())
     {
         L_PRINT(LOG_ERROR) << XOR("failed to setup memory ");
         return false;
     }
-    L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_GREEN | LOG_COLOR_FORE_INTENSITY) << XOR("memory initialization completed");
+    L_PRINT(LOG_NONE) << console::SetColor(CONSOLE_FORE_GREEN | CONSOLE_FORE_INTENSITY) << XOR("memory initialization completed");
 
     if (!MATH::Setup())
     {
         L_PRINT(LOG_ERROR) << XOR("failed to setup math");
         return false;
     }
-    L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_GREEN | LOG_COLOR_FORE_INTENSITY) << XOR("math initialization completed");
+    L_PRINT(LOG_NONE) << console::SetColor(CONSOLE_FORE_GREEN | CONSOLE_FORE_INTENSITY) << XOR("math initialization completed");
 
     if (!Interface::Setup())
     {
@@ -46,7 +53,7 @@ static bool setup(HMODULE hModule)
         return false;
 
     }
-    L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_GREEN | LOG_COLOR_FORE_INTENSITY) << XOR("interface initialization completed");
+    L_PRINT(LOG_NONE) << console::SetColor(CONSOLE_FORE_GREEN | CONSOLE_FORE_INTENSITY) << XOR("interface initialization completed");
 
     std::vector<std::string> vecNeededModules = { XOR("client.dll"), XOR("engine2.dll"), XOR("schemasystem.dll"), XOR("matchmaking.dll") };
     for (auto& szModule : vecNeededModules)
@@ -57,14 +64,14 @@ static bool setup(HMODULE hModule)
             return false;
         }
     }
-    L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_GREEN | LOG_COLOR_FORE_INTENSITY) << XOR("schema initialization completed");
+    L_PRINT(LOG_NONE) << console::SetColor(CONSOLE_FORE_GREEN | CONSOLE_FORE_INTENSITY) << XOR("schema initialization completed");
 
     if (!convar::setup())
     {
         L_PRINT(LOG_ERROR) << XOR("failed to setup convars");
         return false;
     }
-    L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_GREEN | LOG_COLOR_FORE_INTENSITY) << XOR("convar initialization completed");
+    L_PRINT(LOG_NONE) << console::SetColor(CONSOLE_FORE_GREEN | CONSOLE_FORE_INTENSITY) << XOR("convar initialization completed");
 
 
     if (!inputsystem::setup())
@@ -72,16 +79,16 @@ static bool setup(HMODULE hModule)
         L_PRINT(LOG_ERROR) << XOR("failed to setup inputsystem");
         return false;
     }
-    L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_GREEN | LOG_COLOR_FORE_INTENSITY) << XOR("input system initialization completed");
+    L_PRINT(LOG_NONE) << console::SetColor(CONSOLE_FORE_GREEN | CONSOLE_FORE_INTENSITY) << XOR("input system initialization completed");
 
     if (!hooks::setup())
     {
         L_PRINT(LOG_ERROR) << XOR("failed to setup hooks");
         return false;
     }
-    L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_GREEN | LOG_COLOR_FORE_INTENSITY) << XOR("hooks initialization completed");
+    L_PRINT(LOG_NONE) << console::SetColor(CONSOLE_FORE_GREEN | CONSOLE_FORE_INTENSITY) << XOR("hooks initialization completed");
 
-    L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_GREEN | LOG_COLOR_FORE_INTENSITY) << XOR("Completed chud init!");
+    L_PRINT(LOG_NONE) << console::SetColor(CONSOLE_FORE_GREEN | CONSOLE_FORE_INTENSITY) << XOR("Completed chud init!");
 
     bInitialized = true;
     return true;

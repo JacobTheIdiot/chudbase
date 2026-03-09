@@ -137,28 +137,20 @@ bool convar::dump(const wchar_t* wszFileName)
 bool convar::setup()
 {
 	bool bSuccess = true;
-	L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_CYAN | LOG_COLOR_FORE_INTENSITY) << XOR("checkpoint1");
 	m_pitch = Interface::Cvar->Find(FNV1A::HashConst("m_pitch"));
 	bSuccess &= m_pitch != nullptr;
-	L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_CYAN | LOG_COLOR_FORE_INTENSITY) << XOR("checkpoint2");
 	m_yaw = Interface::Cvar->Find(FNV1A::HashConst("m_yaw"));
 	bSuccess &= m_yaw != nullptr;
-	L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_CYAN | LOG_COLOR_FORE_INTENSITY) << XOR("checkpoint3");
 	sensitivity = Interface::Cvar->Find(FNV1A::HashConst("sensitivity"));
 	bSuccess &= sensitivity != nullptr;
-	L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_CYAN | LOG_COLOR_FORE_INTENSITY) << XOR("checkpoint4");
 	game_type = Interface::Cvar->Find(FNV1A::HashConst("game_type"));
 	bSuccess &= game_type != nullptr;
-	L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_CYAN | LOG_COLOR_FORE_INTENSITY) << XOR("checkpoint5");
 	game_mode = Interface::Cvar->Find(FNV1A::HashConst("game_mode"));
 	bSuccess &= game_mode != nullptr;
-	L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_CYAN | LOG_COLOR_FORE_INTENSITY) << XOR("checkpoint6");
 	mp_teammates_are_enemies = Interface::Cvar->Find(FNV1A::HashConst("mp_teammates_are_enemies"));
 	bSuccess &= mp_teammates_are_enemies != nullptr;
-	L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_CYAN | LOG_COLOR_FORE_INTENSITY) << XOR("checkpoint7");
 	sv_autobunnyhopping = Interface::Cvar->Find(FNV1A::HashConst("sv_autobunnyhopping"));
 	bSuccess &= sv_autobunnyhopping != nullptr;
 
-	L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_CYAN | LOG_COLOR_FORE_INTENSITY) << XOR("checkpoint8");
 	return bSuccess;
 }

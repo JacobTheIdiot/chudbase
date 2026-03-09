@@ -62,7 +62,7 @@ T* Capture(const CInterfaceRegister* pModuleRegister, const char* szInterfaceNam
 
 #ifdef _DEBUG
 			// log interface address
-			L_PRINT(LOG_INFO) << XOR("captured \"") << pRegister->szName << XOR("\" interface at address: ") << L::AddFlags(LOG_MODE_INT_SHOWBASE | LOG_MODE_INT_FORMAT_HEX) << reinterpret_cast<std::uintptr_t>(pInterface);
+			L_PRINT(LOG_INFO) << XOR("captured \"") << pRegister->szName << XOR("\" interface at address: ") << console::AddFlags(LOG_MODE_INT_SHOWBASE | LOG_MODE_INT_FORMAT_HEX) << reinterpret_cast<std::uintptr_t>(pInterface);
 #else
 			L_PRINT(LOG_INFO) << XOR("captured \"") << pRegister->szName << XOR("\" interface");
 #endif

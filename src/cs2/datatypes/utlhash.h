@@ -128,7 +128,7 @@ public:
 					return nIndex;
 			}
 		}
-		L_PRINT(LOG_NONE) << L::SetColor(LOG_COLOR_FORE_YELLOW | LOG_COLOR_FORE_INTENSITY) << "CUtlTSHash::GetElements - returned " << nIndex << " elements";
+		L_PRINT(LOG_NONE) << console::SetColor(CONSOLE_FORE_YELLOW | CONSOLE_FORE_INTENSITY) << "CUtlTSHash::GetElements - returned " << nIndex << " elements";
 
 		return nIndex;
 	}
