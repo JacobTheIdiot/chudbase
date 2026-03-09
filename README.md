@@ -1,5 +1,7 @@
 # chudbase, a bare bones internal for cs2
 
+## what is this
+chudbase is an internal base for cs2 which includes almost nothing more than what is needed. it's just to get you started without having to do the boring parts of making a base
 
 ## features
 - interface system
