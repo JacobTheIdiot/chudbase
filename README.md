@@ -1,6 +1,7 @@
-bare bones internal for cs2
+# chudbase, a bare bones internal for cs2
 
-# features
+
+## features
 - interface system
 - schema system
 - convar system
@@ -11,8 +12,12 @@ bare bones internal for cs2
 - pre made OnRenderStart hook
 - xrefs for every pattern
 
-# how to use
+## how to use
 open the project in visual studio and build, inject with your favorite manual map injector.
 
-# credits
+## coming soon
+- entity list (using OnAddEntity and OnRemoveEntity)
+- more utils
+
+## credits
 asphyxia for some of the interfaces and some other random parts of the base (I credited what I took from them)
