@@ -7,7 +7,6 @@ void gui::drawgui()
     ImGuiStyle& style = ImGui::GetStyle();
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = nullptr;
-    ImGui::StyleColorsDark();
 
     if (GetAsyncKeyState(m_iBind) & 0x1)
         m_bOpen = !m_bOpen;
