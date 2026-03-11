@@ -9,6 +9,7 @@
 #include "cs2/interface/interfaces/iswapchaindx11.h"
 #include "cs2/interface/interfaces/iclientmodeshared.h"
 #include "cs2/interface/interfaces/ccsgoinput.h"
+#include "cs2/interface/interfaces/iengineclient.h"
 #include "cs2/inputsystem.h"
 #include "cs2/entity/entity.h"
 //credit: asphyxia (for the vtable namespace)
