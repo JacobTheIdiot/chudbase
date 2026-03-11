@@ -62,15 +62,39 @@ long hooks::hkWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	inputsystem::OnWndProc(hWnd, uMsg, wParam, lParam);
 	ClipCursor(nullptr);
 
+	static bool s_wasOpen = false;
+
 	if (gui::m_bOpen)
 	{
+		s_wasOpen = true;
 		ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
 
-		const auto oRelativeMouseMode = detours::RelativeMouseMode.GetOriginal< decltype(&hkRelativeMouseMode) >();
+		const auto oRelativeMouseMode = detours::RelativeMouseMode.GetOriginal<decltype(&hkRelativeMouseMode)>();
 		if (oRelativeMouseMode)
-			oRelativeMouseMode(Interface::InputSystem, gui::m_bOpen ? false : gui::m_bInput);
+			oRelativeMouseMode(Interface::InputSystem, false);
 
 		return 1L;
+	}
+
+	//ngl idk if this is the correct way to fix the screen jumping but its okay #ilovebadcode
+	if (s_wasOpen)
+	{
+		s_wasOpen = false;
+
+		RECT rect;
+		if (GetClientRect(hWnd, &rect) && Interface::Engine->IsInGame())
+		{
+			POINT center = {
+				(rect.right - rect.left) / 2,
+				(rect.bottom - rect.top) / 2
+			};
+			ClientToScreen(hWnd, &center);
+			SetCursorPos(center.x, center.y);
+		}
+
+		const auto oRelativeMouseMode = detours::RelativeMouseMode.GetOriginal<decltype(&hkRelativeMouseMode)>();
+		if (oRelativeMouseMode)
+			oRelativeMouseMode(Interface::InputSystem, gui::m_bInput);
 	}
 
 	return ::CallWindowProcW(inputsystem::pOldWndProc, hWnd, uMsg, wParam, lParam);
