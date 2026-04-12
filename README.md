@@ -3,7 +3,9 @@
 ## what is this
 chudbase is an internal base for beginners (or just someone who doesn't want to start a base from scratch) cs2 which includes almost nothing more than what is needed. it's just to get you started without having to do the boring parts of making a base
 
-## disclaimer
+## disclaimers
+This base isn't as good as I'd like it to be, It was rushed and I didn't care much for it, I am currently making a new base that I'm putting real effort into and that will be on github as well when I am done (or atleast further into development)
+
 SOME interfaces are outdated either because I got them from asphyxia or because I got lazy and didn't maintain this in the future. Either way, they won't be hard for you to update yourself. I'm sure you could find them all on uc even.
 
 ## features
